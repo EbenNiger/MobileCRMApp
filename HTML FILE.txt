@@ -1,0 +1,1901 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile CRM - Quick Add</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quick-mode-toggle {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .quick-mode-toggle.active {
+            background: white;
+            color: #2563eb;
+        }
+        
+        .google-setup-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .google-setup-banner h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .google-setup-banner p {
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.9;
+        }
+        
+        .google-signin-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .setup-instructions {
+            background: #fef3c7;
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #fbbf24;
+        }
+        
+        .setup-instructions h3 {
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .setup-instructions ol {
+            color: #78350f;
+            font-size: 0.875rem;
+            margin-left: 1.25rem;
+        }
+        
+        .setup-instructions li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .setup-instructions a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        
+        .quick-add-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            z-index: 999;
+            padding: 1rem;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quick-add-overlay.active {
+            display: flex;
+        }
+        
+        .quick-add-form {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 24rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .quick-add-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .quick-add-header h2 {
+            font-size: 1.25rem;
+            color: #2563eb;
+        }
+        
+        .close-quick-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            font-size: 1.5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quick-form-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .quick-form-group input,
+        .quick-form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .quick-form-group input:focus,
+        .quick-form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        
+        .quick-save-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .quick-save-btn:active {
+            background: #1d4ed8;
+        }
+        
+        .quick-hint {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 88px;
+            z-index: 30;
+        }
+        
+        .search-bar {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .filter-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .contacts-list {
+            padding: 1rem;
+            padding-bottom: 6rem;
+        }
+        
+        .contact-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .contact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+        
+        .contact-name {
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+        
+        .contact-company {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-new { background: #dbeafe; color: #1e40af; }
+        .status-contacted { background: #e9d5ff; color: #6b21a8; }
+        .status-qualified { background: #fef3c7; color: #92400e; }
+        .status-negotiating { background: #fed7aa; color: #9a3412; }
+        .status-converted { background: #d1fae5; color: #065f46; }
+        .status-lost { background: #f3f4f6; color: #374151; }
+        
+        .contact-info {
+            margin-bottom: 0.75rem;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-row a {
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .info-row a:hover {
+            color: #2563eb;
+        }
+        
+        .note-box {
+            background: #fef3c7;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .contact-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .btn-edit { background: #dbeafe; flex: 1; }
+        .btn-delete { background: #fee2e2; }
+        
+        .fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            font-size: 2rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 999;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 28rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1.5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-body {
+            padding: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 6rem;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .submit-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .success-toast {
+            position: fixed;
+            bottom: 5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .success-toast.show {
+            display: block;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>
+                👤 Mobile CRM
+            </h1>
+            <button class="quick-mode-toggle" id="quickModeToggle">
+                ⚡ Quick Add
+            </button>
+        </div>
+    </div>
+
+
+    <div class="google-setup-banner" id="googleBanner">
+        <h3>🚀 Connect to Google Sheets</h3>
+        <p>Sign in to sync your contacts across devices</p>
+        <button class="google-signin-btn" onclick="showSetupInstructions()">
+            📊 Setup Google Sheets
+        </button>
+    </div>
+
+
+    <div class="setup-instructions" id="setupInstructions" style="display: none;">
+        <h3>📋 Google Sheets Setup (One-Time)</h3>
+        <ol>
+            <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
+            <li>Create a new project (e.g., "My CRM")</li>
+            <li>Enable "Google Sheets API"</li>
+            <li>Create credentials (OAuth 2.0 Client ID)</li>
+            <li>Add authorized JavaScript origins (your website URL)</li>
+            <li>Copy your Client ID and paste it in the code</li>
+        </ol>
+        <p style="margin-top: 0.75rem;"><strong>For now:</strong> The app stores data in your browser. It works offline but won't sync between devices until you set up Google Sheets.</p>
+    </div>
+
+
+    <div class="quick-add-overlay" id="quickAddOverlay">
+        <div class="quick-add-form">
+            <div class="quick-add-header">
+                <h2>⚡ Quick Add Contact</h2>
+                <button class="close-quick-btn" onclick="closeQuickAdd()">
+                    ✕
+                </button>
+            </div>
+            <form id="quickAddForm">
+                <div class="quick-form-group">
+                    <input type="text" id="quickName" placeholder="Name *" required>
+                </div>
+                <div class="quick-form-group">
+                    <input type="tel" id="quickPhone" placeholder="Phone Number *" required>
+                </div>
+                <div class="quick-form-group">
+                    <input type="email" id="quickEmail" placeholder="Email (optional)">
+                </div>
+                <div class="quick-form-group">
+                    <select id="quickStatus">
+                        <option value="New Lead">New Lead</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Qualified">Qualified</option>
+                    </select>
+                </div>
+                <button type="submit" class="quick-save-btn">
+                    ⚡ Save Contact
+                </button>
+                <div class="quick-hint">
+                    Tip: Bookmark this page for instant access!
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="success-toast" id="successToast">
+        ✓ Contact saved successfully!
+    </div>
+
+
+    <div class="search-section">
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search contacts...">
+        </div>
+        
+        <div class="filter-buttons" id="filterButtons">
+            <button class="filter-btn active" data-status="all">All (0)</button>
+            <button class="filter-btn" data-status="New Lead">New Lead (0)</button>
+            <button class="filter-btn" data-status="Contacted">Contacted (0)</button>
+            <button class="filter-btn" data-status="Qualified">Qualified (0)</button>
+            <button class="filter-btn" data-status="Negotiating">Negotiating (0)</button>
+            <button class="filter-btn" data-status="Converted">Converted (0)</button>
+            <button class="filter-btn" data-status="Lost">Lost (0)</button>
+        </div>
+    </div>
+
+
+    <div class="contacts-list" id="contactsList"></div>
+
+
+    <button class="fab" id="addContactBtn">
+        +
+    </button>
+
+
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Contact</h2>
+                <button class="close-btn" id="closeModalBtn">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="nameInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="emailInput">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="phoneInput">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" id="companyInput">
+                    </div>
+                    <div class="form-group">
+                        <label>Source</label>
+                        <select id="sourceInput">
+                            <option value="">Select source</option>
+                            <option value="Website">Website</option>
+                            <option value="Referral">Referral</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="Cold Call">Cold Call</option>
+                            <option value="Event">Event</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="statusInput">
+                            <option value="New Lead">New Lead</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Qualified">Qualified</option>
+                            <option value="Negotiating">Negotiating</option>
+                            <option value="Converted">Converted</option>
+                            <option value="Lost">Lost</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="notesInput"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        💾 <span id="submitBtnText">Add Contact</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let contacts = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let editingContactId = null;
+        let quickAddMode = false;
+
+
+        function loadContacts() {
+            const stored = localStorage.getItem('crmContacts');
+            if (stored) {
+                contacts = JSON.parse(stored);
+            } else {
+                contacts = [
+                    {
+                        id: Date.now().toString(),
+                        name: 'Sample Contact',
+                        email: 'sample@example.com',
+                        phone: '+1234567890',
+                        company: 'Demo Company',
+                        source: 'Website',
+                        status: 'New Lead',
+                        notes: 'This is a sample contact. Tap Edit to modify or Delete to remove.',
+                        dateAdded: new Date().toISOString().split('T')[0],
+                        history: []
+                    }
+                ];
+                saveContacts();
+            }
+            renderContacts();
+            updateFilterCounts();
+        }
+
+
+        function saveContacts() {
+            localStorage.setItem('crmContacts', JSON.stringify(contacts));
+        }
+
+
+        function showSuccessToast(message) {
+            const toast = document.getElementById('successToast');
+            toast.textContent = message || '✓ Contact saved successfully!';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+
+        document.getElementById('quickModeToggle').addEventListener('click', () => {
+            quickAddMode = !quickAddMode;
+            const btn = document.getElementById('quickModeToggle');
+            const overlay = document.getElementById('quickAddOverlay');
+            
+            if (quickAddMode) {
+                btn.classList.add('active');
+                overlay.classList.add('active');
+                document.getElementById('quickName').focus();
+            } else {
+                btn.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
+
+
+        function closeQuickAdd() {
+            quickAddMode = false;
+            document.getElementById('quickModeToggle').classList.remove('active');
+            document.getElementById('quickAddOverlay').classList.remove('active');
+            document.getElementById('quickAddForm').reset();
+        }
+
+
+        document.getElementById('quickAddForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newContact = {
+                id: Date.now().toString(),
+                name: document.getElementById('quickName').value,
+                phone: document.getElementById('quickPhone').value,
+                email: document.getElementById('quickEmail').value || '',
+                company: '',
+                source: 'Quick Add',
+                status: document.getElementById('quickStatus').value,
+                notes: '',
+                dateAdded: new Date().toISOString().split('T')[0],
+                history: []
+            };
+            
+            contacts.unshift(newContact);
+            saveContacts();
+            renderContacts();
+            updateFilterCounts();
+            
+            showSuccessToast('⚡ Contact added quickly!');
+            document.getElementById('quickAddForm').reset();
+            closeQuickAdd();
+        });
+
+
+        function showSetupInstructions() {
+            const instructions = document.getElementById('setupInstructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+        }
+
+
+        function getStatusClass(status) {
+            const classes = {
+                'New Lead': 'status-new',
+                'Contacted': 'status-contacted',
+                'Qualified': 'status-qualified',
+                'Negotiating': 'status-negotiating',
+                'Converted': 'status-converted',
+                'Lost': 'status-lost'
+            };
+            return classes[status] || 'status-new';
+        }
+
+
+        function renderContacts() {
+            const container = document.getElementById('contactsList');
+            let filtered = contacts;
+
+
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(c => c.status === currentFilter);
+            }
+
+
+            if (currentSearch) {
+                const search = currentSearch.toLowerCase();
+                filtered = filtered.filter(c => 
+                    c.name.toLowerCase().includes(search) ||
+                    (c.email && c.email.toLowerCase().includes(search)) ||
+                    (c.phone && c.phone.toLowerCase().includes(search)) ||
+                    (c.company && c.company.toLowerCase().includes(search))
+                );
+            }
+
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p style="font-size: 3rem;">👤</p>
+                        <p>No contacts found</p>
+                        <p style="font-size: 0.875rem;">Try the ⚡ Quick Add button to add contacts faster!</p>
+                    </div>
+                `;
+                return;
+            }
+
+
+            container.innerHTML = filtered.map(contact => `
+                <div class="contact-card">
+                    <div class="contact-header">
+                        <div>
+                            <div class="contact-name">${contact.name}</div>
+                            ${contact.company ? `
+                                <div class="contact-company">
+                                    🏢 <span>${contact.company}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <span class="status-badge ${getStatusClass(contact.status)}">${contact.status}</span>
+                    </div>
+                    
+                    <div class="contact-info">
+                        ${contact.phone ? `
+                            <div class="info-row">
+                                📞 <a href="tel:${contact.phone}">${contact.phone}</a>
+                            </div>
+                        ` : ''}
+                        ${contact.email ? `
+                            <div class="info-row">
+                                ✉️ <a href="mailto:${contact.email}">${contact.email}</a>
+                            </div>
+                        ` : ''}
+                        ${contact.source ? `
+                            <div class="info-row" style="font-size: 0.75rem; color: #6b7280;">
+                                📌 Source: ${contact.source}
+                            </div>
+                        ` : ''}
+                        ${contact.dateAdded ? `
+                            <div style="font-size: 0.75rem; color: #9ca3af;">
+                                Added: ${contact.dateAdded}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${contact.notes ? `
+                        <div class="note-box">
+                            <strong>Note:</strong> ${contact.notes}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="contact-actions">
+                        <button class="action-btn btn-edit" onclick="editContact('${contact.id}')">
+                            ✏️ Edit
+                        </button>
+                        
+                        <button class="action-btn btn-delete" onclick="deleteContact('${contact.id}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+
+        function editContact(id) {
+            const contact = contacts.find(c => c.id === id);
+            if (!contact) return;
+            
+            editingContactId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Contact';
+            document.getElementById('submitBtnText').textContent = 'Update Contact';
+            
+            document.getElementById('nameInput').value = contact.name;
+            document.getElementById('emailInput').value = contact.email || '';
+            document.getElementById('phoneInput').value = contact.phone || '';
+            document.getElementById('companyInput').value = contact.company || '';
+            document.getElementById('sourceInput').value = contact.source || '';
+            document.getElementById('statusInput').value = contact.status;
+            document.getElementById('notesInput').value = contact.notes || '';
+            
+            document.getElementById('contactModal').classList.add('active');
+        }
+
+
+        function deleteContact(id) {
+            if (!confirm('Are you sure you want to delete this contact?')) return;
+            
+            contacts = contacts.filter(c => c.id !== id);
+            saveContacts();
+            renderContacts();
+            updateFilterCounts();
+            showSuccessToast('Contact deleted');
+        }
+
+
+        function updateFilterCounts() {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                const status = btn.dataset.status;
+                let count = 0;
+                if (status === 'all') {
+                    count = contacts.length;
+                } else {
+                    count = contacts.filter(c => c.status === status).length;
+                }
+                btn.textContent = `${status === 'all' ? 'All' : status} (${count})`;
+            });
+        }
+
+
+        document.getElementById('addContactBtn').addEventListener('click', () => {
+            editingContactId = null;
+            document.getElementById('modalTitle').text<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile CRM - Quick Add</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quick-mode-toggle {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .quick-mode-toggle.active {
+            background: white;
+            color: #2563eb;
+        }
+        
+        .google-setup-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .google-setup-banner h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .google-setup-banner p {
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.9;
+        }
+        
+        .google-signin-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .setup-instructions {
+            background: #fef3c7;
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #fbbf24;
+        }
+        
+        .setup-instructions h3 {
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .setup-instructions ol {
+            color: #78350f;
+            font-size: 0.875rem;
+            margin-left: 1.25rem;
+        }
+        
+        .setup-instructions li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .setup-instructions a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        
+        .quick-add-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            z-index: 999;
+            padding: 1rem;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quick-add-overlay.active {
+            display: flex;
+        }
+        
+        .quick-add-form {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 24rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .quick-add-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .quick-add-header h2 {
+            font-size: 1.25rem;
+            color: #2563eb;
+        }
+        
+        .close-quick-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            font-size: 1.5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quick-form-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .quick-form-group input,
+        .quick-form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .quick-form-group input:focus,
+        .quick-form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        
+        .quick-save-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .quick-save-btn:active {
+            background: #1d4ed8;
+        }
+        
+        .quick-hint {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 88px;
+            z-index: 30;
+        }
+        
+        .search-bar {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .filter-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .contacts-list {
+            padding: 1rem;
+            padding-bottom: 6rem;
+        }
+        
+        .contact-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .contact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+        
+        .contact-name {
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+        
+        .contact-company {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-new { background: #dbeafe; color: #1e40af; }
+        .status-contacted { background: #e9d5ff; color: #6b21a8; }
+        .status-qualified { background: #fef3c7; color: #92400e; }
+        .status-negotiating { background: #fed7aa; color: #9a3412; }
+        .status-converted { background: #d1fae5; color: #065f46; }
+        .status-lost { background: #f3f4f6; color: #374151; }
+        
+        .contact-info {
+            margin-bottom: 0.75rem;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #374151;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-row a {
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .info-row a:hover {
+            color: #2563eb;
+        }
+        
+        .note-box {
+            background: #fef3c7;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .contact-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .btn-edit { background: #dbeafe; flex: 1; }
+        .btn-delete { background: #fee2e2; }
+        
+        .fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            font-size: 2rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 999;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 28rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1.5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-body {
+            padding: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 6rem;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .submit-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .success-toast {
+            position: fixed;
+            bottom: 5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .success-toast.show {
+            display: block;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>
+                👤 Mobile CRM
+            </h1>
+            <button class="quick-mode-toggle" id="quickModeToggle">
+                ⚡ Quick Add
+            </button>
+        </div>
+    </div>
+
+
+    <div class="google-setup-banner" id="googleBanner">
+        <h3>🚀 Connect to Google Sheets</h3>
+        <p>Sign in to sync your contacts across devices</p>
+        <button class="google-signin-btn" onclick="showSetupInstructions()">
+            📊 Setup Google Sheets
+        </button>
+    </div>
+
+
+    <div class="setup-instructions" id="setupInstructions" style="display: none;">
+        <h3>📋 Google Sheets Setup (One-Time)</h3>
+        <ol>
+            <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
+            <li>Create a new project (e.g., "My CRM")</li>
+            <li>Enable "Google Sheets API"</li>
+            <li>Create credentials (OAuth 2.0 Client ID)</li>
+            <li>Add authorized JavaScript origins (your website URL)</li>
+            <li>Copy your Client ID and paste it in the code</li>
+        </ol>
+        <p style="margin-top: 0.75rem;"><strong>For now:</strong> The app stores data in your browser. It works offline but won't sync between devices until you set up Google Sheets.</p>
+    </div>
+
+
+    <div class="quick-add-overlay" id="quickAddOverlay">
+        <div class="quick-add-form">
+            <div class="quick-add-header">
+                <h2>⚡ Quick Add Contact</h2>
+                <button class="close-quick-btn" onclick="closeQuickAdd()">
+                    ✕
+                </button>
+            </div>
+            <form id="quickAddForm">
+                <div class="quick-form-group">
+                    <input type="text" id="quickName" placeholder="Name *" required>
+                </div>
+                <div class="quick-form-group">
+                    <input type="tel" id="quickPhone" placeholder="Phone Number *" required>
+                </div>
+                <div class="quick-form-group">
+                    <input type="email" id="quickEmail" placeholder="Email (optional)">
+                </div>
+                <div class="quick-form-group">
+                    <select id="quickStatus">
+                        <option value="New Lead">New Lead</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Qualified">Qualified</option>
+                    </select>
+                </div>
+                <button type="submit" class="quick-save-btn">
+                    ⚡ Save Contact
+                </button>
+                <div class="quick-hint">
+                    Tip: Bookmark this page for instant access!
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="success-toast" id="successToast">
+        ✓ Contact saved successfully!
+    </div>
+
+
+    <div class="search-section">
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search contacts...">
+        </div>
+        
+        <div class="filter-buttons" id="filterButtons">
+            <button class="filter-btn active" data-status="all">All (0)</button>
+            <button class="filter-btn" data-status="New Lead">New Lead (0)</button>
+            <button class="filter-btn" data-status="Contacted">Contacted (0)</button>
+            <button class="filter-btn" data-status="Qualified">Qualified (0)</button>
+            <button class="filter-btn" data-status="Negotiating">Negotiating (0)</button>
+            <button class="filter-btn" data-status="Converted">Converted (0)</button>
+            <button class="filter-btn" data-status="Lost">Lost (0)</button>
+        </div>
+    </div>
+
+
+    <div class="contacts-list" id="contactsList"></div>
+
+
+    <button class="fab" id="addContactBtn">
+        +
+    </button>
+
+
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Contact</h2>
+                <button class="close-btn" id="closeModalBtn">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="nameInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="emailInput">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="phoneInput">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" id="companyInput">
+                    </div>
+                    <div class="form-group">
+                        <label>Source</label>
+                        <select id="sourceInput">
+                            <option value="">Select source</option>
+                            <option value="Website">Website</option>
+                            <option value="Referral">Referral</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="Cold Call">Cold Call</option>
+                            <option value="Event">Event</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="statusInput">
+                            <option value="New Lead">New Lead</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Qualified">Qualified</option>
+                            <option value="Negotiating">Negotiating</option>
+                            <option value="Converted">Converted</option>
+                            <option value="Lost">Lost</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="notesInput"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        💾 <span id="submitBtnText">Add Contact</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let contacts = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let editingContactId = null;
+        let quickAddMode = false;
+
+
+        function loadContacts() {
+            const stored = localStorage.getItem('crmContacts');
+            if (stored) {
+                contacts = JSON.parse(stored);
+            } else {
+                contacts = [
+                    {
+                        id: Date.now().toString(),
+                        name: 'Sample Contact',
+                        email: 'sample@example.com',
+                        phone: '+1234567890',
+                        company: 'Demo Company',
+                        source: 'Website',
+                        status: 'New Lead',
+                        notes: 'This is a sample contact. Tap Edit to modify or Delete to remove.',
+                        dateAdded: new Date().toISOString().split('T')[0],
+                        history: []
+                    }
+                ];
+                saveContacts();
+            }
+            renderContacts();
+            updateFilterCounts();
+        }
+
+
+        function saveContacts() {
+            localStorage.setItem('crmContacts', JSON.stringify(contacts));
+        }
+
+
+        function showSuccessToast(message) {
+            const toast = document.getElementById('successToast');
+            toast.textContent = message || '✓ Contact saved successfully!';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+
+        document.getElementById('quickModeToggle').addEventListener('click', () => {
+            quickAddMode = !quickAddMode;
+            const btn = document.getElementById('quickModeToggle');
+            const overlay = document.getElementById('quickAddOverlay');
+            
+            if (quickAddMode) {
+                btn.classList.add('active');
+                overlay.classList.add('active');
+                document.getElementById('quickName').focus();
+            } else {
+                btn.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
+
+
+        function closeQuickAdd() {
+            quickAddMode = false;
+            document.getElementById('quickModeToggle').classList.remove('active');
+            document.getElementById('quickAddOverlay').classList.remove('active');
+            document.getElementById('quickAddForm').reset();
+        }
+
+
+        document.getElementById('quickAddForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newContact = {
+                id: Date.now().toString(),
+                name: document.getElementById('quickName').value,
+                phone: document.getElementById('quickPhone').value,
+                email: document.getElementById('quickEmail').value || '',
+                company: '',
+                source: 'Quick Add',
+                status: document.getElementById('quickStatus').value,
+                notes: '',
+                dateAdded: new Date().toISOString().split('T')[0],
+                history: []
+            };
+            
+            contacts.unshift(newContact);
+            saveContacts();
+            renderContacts();
+            updateFilterCounts();
+            
+            showSuccessToast('⚡ Contact added quickly!');
+            document.getElementById('quickAddForm').reset();
+            closeQuickAdd();
+        });
+
+
+        function showSetupInstructions() {
+            const instructions = document.getElementById('setupInstructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+        }
+
+
+        function getStatusClass(status) {
+            const classes = {
+                'New Lead': 'status-new',
+                'Contacted': 'status-contacted',
+                'Qualified': 'status-qualified',
+                'Negotiating': 'status-negotiating',
+                'Converted': 'status-converted',
+                'Lost': 'status-lost'
+            };
+            return classes[status] || 'status-new';
+        }
+
+
+        function renderContacts() {
+            const container = document.getElementById('contactsList');
+            let filtered = contacts;
+
+
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(c => c.status === currentFilter);
+            }
+
+
+            if (currentSearch) {
+                const search = currentSearch.toLowerCase();
+                filtered = filtered.filter(c => 
+                    c.name.toLowerCase().includes(search) ||
+                    (c.email && c.email.toLowerCase().includes(search)) ||
+                    (c.phone && c.phone.toLowerCase().includes(search)) ||
+                    (c.company && c.company.toLowerCase().includes(search))
+                );
+            }
+
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p style="font-size: 3rem;">👤</p>
+                        <p>No contacts found</p>
+                        <p style="font-size: 0.875rem;">Try the ⚡ Quick Add button to add contacts faster!</p>
+                    </div>
+                `;
+                return;
+            }
+
+
+            container.innerHTML = filtered.map(contact => `
+                <div class="contact-card">
+                    <div class="contact-header">
+                        <div>
+                            <div class="contact-name">${contact.name}</div>
+                            ${contact.company ? `
+                                <div class="contact-company">
+                                    🏢 <span>${contact.company}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <span class="status-badge ${getStatusClass(contact.status)}">${contact.status}</span>
+                    </div>
+                    
+                    <div class="contact-info">
+                        ${contact.phone ? `
+                            <div class="info-row">
+                                📞 <a href="tel:${contact.phone}">${contact.phone}</a>
+                            </div>
+                        ` : ''}
+                        ${contact.email ? `
+                            <div class="info-row">
+                                ✉️ <a href="mailto:${contact.email}">${contact.email}</a>
+                            </div>
+                        ` : ''}
+                        ${contact.source ? `
+                            <div class="info-row" style="font-size: 0.75rem; color: #6b7280;">
+                                📌 Source: ${contact.source}
+                            </div>
+                        ` : ''}
+                        ${contact.dateAdded ? `
+                            <div style="font-size: 0.75rem; color: #9ca3af;">
+                                Added: ${contact.dateAdded}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${contact.notes ? `
+                        <div class="note-box">
+                            <strong>Note:</strong> ${contact.notes}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="contact-actions">
+                        <button class="action-btn btn-edit" onclick="editContact('${contact.id}')">
+                            ✏️ Edit
+                        </button>
+                        
+                        <button class="action-btn btn-delete" onclick="deleteContact('${contact.id}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+
+        function editContact(id) {
+            const contact = contacts.find(c => c.id === id);
+            if (!contact) return;
+            
+            editingContactId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Contact';
+            document.getElementById('submitBtnText').textContent = 'Update Contact';
+            
+            document.getElementById('nameInput').value = contact.name;
+            document.getElementById('emailInput').value = contact.email || '';
+            document.getElementById('phoneInput').value = contact.phone || '';
+            document.getElementById('companyInput').value = contact.company || '';
+            document.getElementById('sourceInput').value = contact.source || '';
+            document.getElementById('statusInput').value = contact.status;
+            document.getElementById('notesInput').value = contact.notes || '';
+            
+            document.getElementById('contactModal').classList.add('active');
+        }
+
+
+        function deleteContact(id) {
+            if (!confirm('Are you sure you want to delete this contact?')) return;
+            
+            contacts = contacts.filter(c => c.id !== id);
+            saveContacts();
+            renderContacts();
+            updateFilterCounts();
+            showSuccessToast('Contact deleted');
+        }
+
+
+        function updateFilterCounts() {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                const status = btn.dataset.status;
+                let count = 0;
+                if (status === 'all') {
+                    count = contacts.length;
+                } else {
+                    count = contacts.filter(c => c.status === status).length;
+                }
+                btn.textContent = `${status === 'all' ? 'All' : status} (${count})`;
+            });
+        }
+
+
+        document.getElementById('addContactBtn').addEventListener('click', () => {
+            editingContactId = null;
+            document.getElementById('modalTitle').text
